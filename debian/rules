@@ -4,6 +4,10 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
+ifeq ($(DEB_HOST_ARCH),arm64)
+	extra_configure_opts = -DRPI_INCLUDE_DIR=/opt/vc/include -DRPI_LIB_DIR=/opt/vc/lib
+endif
+
 %:
 	dh  $@ --with python3
 
@@ -11,6 +15,7 @@ override_dh_auto_configure:
 	ln -s /usr/include/cec-platform include/platform && \
 	dh_auto_configure -- -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=1 -DCMAKE_INSTALL_LIBDIR=/usr/lib/$(DEB_HOST_MULTIARCH) \
 		-DHAVE_EXYNOS_API=1 \
+	         $(extra_configure_opts) \
 		-DHAVE_AOCEC_API=1
 
 override_dh_auto_install:
